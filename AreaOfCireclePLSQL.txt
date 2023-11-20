@@ -1,0 +1,15 @@
+create table circle (radius number, area number);
+Declare
+    radius1 number;
+	area1 number;
+Begin
+for radius1 in 5..9 loop
+area1:=3.14*radius1*radius1;
+insert into circle values(radius1,area1);
+end loop;
+commit;
+Exception
+    when others then
+    	DBMS_OUTPUT.PUT_LINE('Error:'||SQLERRM);
+END; 
+SELECT*FROM circle;

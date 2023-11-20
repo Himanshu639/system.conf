@@ -1,0 +1,50 @@
+-- Create Result table
+CREATE TABLE Result (
+    Roll NUMBER,
+    Name VARCHAR2(50),
+    Class VARCHAR2(50)
+);
+
+-- Create the stored procedure proc_Grade
+CREATE OR REPLACE PROCEDURE proc_Grade(
+    p_name IN VARCHAR2,
+    p_total_marks IN NUMBER
+) AS
+    v_class VARCHAR2(50);
+BEGIN
+    IF p_total_marks >= 990 AND p_total_marks <= 1500 THEN
+        IF p_total_marks >= 990 THEN
+            v_class := 'Distinction';
+        ELSIF p_total_marks BETWEEN 900 AND 989 THEN
+            v_class := 'First Class';
+        ELSIF p_total_marks BETWEEN 825 AND 899 THEN
+            v_class := 'Higher Second Class';
+        ELSE
+            v_class := 'Not Categorized';
+        END IF;
+
+        -- Insert the result into the Result table
+        INSERT INTO Result(Roll, Name, Class)
+        VALUES (SEQ_Result_Roll.NEXTVAL, p_name, v_class);
+        
+        DBMS_OUTPUT.PUT_LINE('Student ' || p_name || ' has been categorized as ' || v_class);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid total marks for student ' || p_name);
+    END IF;
+END proc_Grade;
+/
+
+-- PL/SQL block to use the created procedure
+DECLARE
+    v_student_name VARCHAR2(50);
+    v_student_marks NUMBER;
+BEGIN
+    -- Example student data
+    v_student_name := 'John Doe';
+    v_student_marks := 950;
+
+    -- Call the procedure to categorize the student
+    proc_Grade(v_student_name, v_student_marks);
+END;
+/
+assign  6

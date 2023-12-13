@@ -7,19 +7,18 @@
 
 using namespace std;
 
-// Define a graph class
+
 class Graph {
-public:
-    // Constructor
+public:   
     Graph() {}
 
-    // Add an undirected edge between two nodes
+
     void addEdge(const string& node1, const string& node2) {
         adjacencyList[node1].push_back(node2);
         adjacencyList[node2].push_back(node1);
     }
 
-    // Perform Depth-First Search (DFS)
+
     void DFS(const string& startNode) {
         unordered_set<string> visited;
         stack<string> s;
@@ -44,7 +43,7 @@ public:
         cout << endl;
     }
 
-    // Perform Breadth-First Search (BFS)
+
     void BFS(const string& startNode) {
         unordered_set<string> visited;
         queue<string> q;
@@ -74,21 +73,21 @@ private:
 };
 
 int main() {
-    // Create a graph representing the map of the area around the college
+
     Graph mapGraph;
 
-    // Add landmarks as nodes and edges between them
+
     mapGraph.addEdge("College", "Park");
     mapGraph.addEdge("College", "Library");
     mapGraph.addEdge("Park", "Market");
     mapGraph.addEdge("Library", "Cafe");
     mapGraph.addEdge("Cafe", "Market");
 
-    // Perform DFS starting from "College"
+
     cout << "DFS starting from College: ";
     mapGraph.DFS("College");
 
-    // Perform BFS starting from "College"
+
     cout << "BFS starting from College: ";
     mapGraph.BFS("College");
 

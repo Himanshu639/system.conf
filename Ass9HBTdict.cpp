@@ -6,201 +6,416 @@ complexity for finding a keyword*/
 #include<iostream>
 #include<string>
 using namespace std;
-struct node
+class dictionary;
+class avlnode
 {
-	string data;
-	string mean;
-	node *left,*right;
-}*root;
-class avl
-{
-	public:
-		node * insert(node *,string,string);
-		int height(node*);
-		int diff(node*);
-		node *bal(node*);
-		node *ll(node *);
-		node *rr(node *);
-		node *lr(node *);
-		node *rl(node *);
-		void inorder1(node *);
-		void search(string);
+ string keyword;
+ string meaning;
+ avlnode *left,*right;
+ int bf;
+ public:
+ avlnode()
+ {
+  keyword='\0';
+  meaning='\0';
+  left=right=NULL;
+  bf=0;
+ }
+ avlnode(string k,string m)
+ {
+  keyword=k;
+  meaning=m;
+  left=right=NULL;
+  bf=0;
+ }
+friend class dictionary;
 };
-node * avl::insert(node *root,string key,string val)
+
+class dictionary
 {
-	
-	if(root==NULL)
-	{
-		root=new node;
-		root->data=key;
-		root->mean=val;
-		root->left=NULL;
-		root->right=NULL;
-		return root;	
-	}
-	else if(key<root->data)
-	{
-		root->left=insert(root->left,key,val);
-		root=bal(root);
-	}
-	else if(key>=root->data)
-	{
-		root->right=insert(root->right,key,val);
-		root=bal(root);
-	}
-	//cout<<root;
-	return root;
-}
-int avl::height(node *temp)
+ avlnode *par,*loc;
+ public:
+ avlnode *root;
+ dictionary()
+ { 
+  root=NULL;
+  par=loc=NULL;
+ }
+ void accept();
+ void insert(string key,string mean);
+ void LLrotation(avlnode*,avlnode*);
+ 
+ void RRrotation(avlnode*,avlnode*);
+ 
+ void inorder(avlnode *root);
+ void deletekey(string key);
+ void descending(avlnode *);
+ void search(string);
+ void update(string,string);
+
+};
+void dictionary::descending(avlnode *root)
 {
-	int h=0;
-	if(temp!=NULL)
-	{
-		int l_hgt=height(temp->left);
-		int r_hgt=height(temp->right);
-		if(l_hgt<r_hgt)
-			h=(r_hgt+1);
-		else
-			h=(l_hgt+1);
-			return h;
-	}
+ if(root)
+ {
+  descending(root->right);
+  cout<<root->keyword<<" "<<root->meaning<<endl;
+  descending(root->left);
+ }
 }
-int avl::diff(node* temp)
+
+void dictionary::accept()
 {
-	int l_fac=height(temp->left);
-	int r_fac=height(temp->right);
-	int d_fac=l_fac-r_fac;
-	return(d_fac);
+ string key,mean;
+ cout<<"Enter keyword "<<endl;
+ cin>>key;
+ cout<<"Enter meaning "<<endl;
+ cin>>mean;
+ insert(key,mean);
 }
-node *avl::bal(node *temp)
+void dictionary::LLrotation(avlnode *a,avlnode *b)
 {
-	int b_fact=diff(temp);
-	if(b_fact>1)
-	{
-		if(diff(temp->left)>0)
-			temp=ll(temp);
-		else
-		temp=lr(temp);
-	}
-	else if(b_fact< -1)
-	{
-		if(diff(temp->right)>0)
-			temp=rl(temp);
-		else
-			temp=rr(temp);
-	}
-	return temp;
+ cout<<"LL rotation"<<endl; 
+ a->left=b->right;
+ b->right=a;
+ a->bf=b->bf=0;
 }
-node *avl::ll(node *par)
+
+void dictionary::RRrotation(avlnode *a,avlnode *b)
 {
-	node *temp;
-	temp=par->left;
-	par->left=temp->right;
-	temp->right=par;
-	return(temp);
+ cout<<"RR rotation"<<endl; 
+ a->right=b->left;
+ b->left=a;
+ a->bf=b->bf=0;
 }
-node *avl::rr(node *par)
+
+
+
+
+
+
+
+void dictionary::insert(string key,string mean)
 {
-	node *temp;
-	temp=par->right;
-	par->right=temp->left;
-	temp->left=par;
-	return(temp);
-}
-node *avl::lr(node *par)
-{
-	node *temp;
-	temp=par->left;
-	par->left=rr(temp);
-	par=ll(par);
-	return(par);
-}
-node *avl::rl(node *par)
-{
-	node *temp;
-	temp=par->right;
-	par->right=ll(temp);
-	par=rr(par);
-	return(par);
-}
-void avl::inorder1(node *T)
+ //cout<<"IN Insert \n";
+ if(!root)
+ {
+  //create new root
+  root=new avlnode(key,mean);
+  cout<<"ROOT CREATED \n";
+  return;
+ }
+// else
+// {
+  avlnode *a,*pa,*p,*pp;
+  //a=NULL;
+  pa=NULL;
+  p=a=root;
+  pp=NULL;
+
+  while(p)
   {
-	 if(T!=NULL)
-		{
-		  inorder1(T->left);
-		  cout<<"\n"<<T->data<<"="<<T->mean;
-		  inorder1(T->right);
-		}
+   cout<<"In first while \n";
+   if(p->bf)
+   {
+   a=p;
+   pa=pp;
+   }
+   if(key<p->keyword){pp=p;p=p->left;}   //takes the left branch
+   else if(key>p->keyword){pp=p;p=p->right;} //right branch
+   else
+   {
+    //p->meaning=mean;
+    cout<<"Already exist \n";
+    return;
+   }
+  }
+  cout<<"Outside while \n";
+  avlnode *y=new avlnode(key,mean);  
+  if(key<pp->keyword)
+  {
+   pp->left=y;
+  }
+  else
+   pp->right=y;
+  cout<<"KEY INSERTED \n";
+
+  int d;
+  avlnode *b,*c;
+  //a=pp;
+  b=c=NULL;
+  if(key>a->keyword)
+  {
+   cout<<"KEY >A->KEYWORD \n";
+   b=p=a->right;
+   d=-1;
+   cout<<" RIGHT HEAVY \n";
+  }
+  else
+  {
+   cout<<"KEY < A->KEYWORD \n";
+   b=p=a->left;
+   d=1;
+   cout<<" LEFT HEAVY \n";
+  }
+
+  while(p!=y)
+  {
+   if(key>p->keyword)
+   {
+    p->bf=-1;
+    p=p->right;
+
+   }
+   else
+   {
+    p->bf=1;
+    p=p->left;
+   }
+  
+  }
+  cout<<" DONE ADJUSTING INTERMEDIATE NODES \n";
+  if(!(a->bf)||!(a->bf+d))
+  {
+   a->bf+=d;
+   return;
+  }
+  //else
+  //{
+  if(d==1)
+  {
+   //left heavy
+   if(b->bf==1)
+   {
+    LLrotation(a,b);
+    /*a->left=b->right;
+    b->right=a;
+    a->bf=0;
+    b->bf=0;*/
+   }
+   else //if(b->bf==-1)
+   {
+    
+    cout<<"LR rotation"<<endl;  
+    c=b->right;
+    b->right=c->left;
+    a->left=c->right;
+    c->left=b;
+    c->right=a;
+    switch(c->bf)
+    {
+     case 1:
+     {
+      a->bf=-1;
+      b->bf=0;
+      break;
+     }
+     case -1:
+     {
+      a->bf=0;
+      b->bf=1;
+      break;
+     }
+
+     case 0:
+     {
+      a->bf=0;
+      b->bf=0;
+      break;
+     }
+  
+    }
+    c->bf=0;
+    b=c;   //b is new root
+
+    
+   }
+   //else
+   // cout<<"Balanced \n";
 
   }
-void avl::search(string n)
-{
-	node *T;
-	T=root;
-	int flag=0,count=1;
-	//cout<<"\nEnter the number for search:";
-	//cin>>n;
-	while(T!=NULL)
-	{
-		if(T->data==n)
-		{
-			cout<<"\nfound";
-			 flag=1;
-			cout<<"\ncomparison:"<<count;
-			break;
-		}
-		else if(n>T->data)
-		{
-			count+=1;
-			T=T->right;
-		}
-		else
-		{
-			count+=1;
-			T=T->left;
-		}
-	}
-	if(flag==0)
-		cout<<"\nnot found";
-}
-  int main()
+ 
+  if(d==-1)
   {
-  	char choice;
-  	string val;
-  	string key;
-  	string srch;
-  	int ch,op=1;
-  	avl a1;
-  	
-  	while(op==1)
-  	{
-  		cout<<"\n1:Insertion"<<"\n2:display"<<"\n3:search"<<"\nEnter your choice:";
-  		cin>>ch;
-	  	switch(ch)
-	  	{
-		  	case 1:
-			  	do
-			  	{
-			  		cout<<"\nEnter the keyword:";
-			  		cin>>key;
-			  		cout<<"\nEnter the value:";
-			  		cin>>val;
-					root=a1.insert(root,key,val);
-					cout<<"If you want to continue press y/Y:";	
-					cin>>choice;
-				}while(choice=='y' || choice=='Y');
-				break;
-			case 2:
-		  		a1.inorder1(root);
-		  		break;
-			case 3:
-			  	cout<<"\nEnter the keyword:";
-				cin>>srch;
-				a1.search(srch);
-				break;
-		}
-		cout<<"\nDo you want to continue 1:";
-		cin>>op;
-	}
-  return 0;
+   if(b->bf==-1)
+   {
+  //  cout<<"RR rotation"<<endl; 
+    /*a->right=b->left;
+    b->left=a;
+    a->bf=b->bf=0;*/
+    RRrotation(a,b);
+   }
+   else// if(b->bf==1)
+   {
+    c=b->left;
+  //  cout<<"RL rotation"<<endl;  
+    a->right=c->left;
+    b->left=c->right;
+    c->left=a;
+    c->right=b;
+    switch(c->bf)
+    {
+     case 1:
+     {
+      a->bf=0;
+      b->bf=-1;
+      break;
+     }
+     case -1:
+     {
+      a->bf=1;
+      b->bf=0;
+      break;
+     }
+
+     case 0:
+     {
+      a->bf=0;
+      b->bf=0;
+      break;
+     }
+  
+    }
+    c->bf=0;
+    b=c;  //b is new root
+    
+   }
+
+   //else
+    //cout<<"Balanced \n";
+  }
+  //}
+  if(!pa)
+   root=b;
+  else if(a==pa->left)
+   pa->left=b;
+  else
+   pa->right=b;
+  cout<<"AVL tree created!! \n";
+  //cout<<"AVL \n";
+  //inorder(root);
 }
+void dictionary::search(string key)
+{
+ cout<<"ENTER SEARCH \n";
+ loc=NULL;
+ par=NULL;
+ if(root==NULL)
+ {
+  cout<<"Tree not created  "<<endl;
+  // root=key;
+  loc=NULL;
+  par=NULL;
+ }
+
+ //par=NULL;loc=NULL;
+ avlnode *ptr;
+ ptr=root;
+ while(ptr!=NULL)
+ {
+  if(ptr->keyword==key)
+  {
+
+   //flag=1;
+   loc=ptr;
+   break;                                    //imp for delete1 else it doesnt exit while loop
+  }
+  else if(key<ptr->keyword)
+  {
+   par=ptr;
+   ptr=ptr->left;
+  }
+
+  else
+  {
+   par=ptr;                           //edit this in previous code
+   ptr=ptr->right;
+   
+  }
+ }
+ 
+ if(loc==NULL)
+ {
+  cout<<"Not found "<<endl;
+ }
+ 
+}
+
+void dictionary::update(string oldkey,string newmean)
+{
+ search(oldkey);
+ loc->meaning=newmean;
+ cout<<"UPDATE SUCCESSFUL \n";
+}
+void dictionary::deletekey(string key)
+{
+ 
+}
+void dictionary::inorder(avlnode *root)
+{
+ if(root)
+ {
+  inorder(root->left);
+  cout<<root->keyword<<" "<<root->meaning<<endl;
+  inorder(root->right);
+ }
+}
+
+int main()
+{
+ string k,m;
+ dictionary d;
+ int ch;
+ string key,mean;
+ 
+ do
+ {
+ cout<<"1.Insert \n2.Update \n3.Ascending \n4.Descending \n5.Display \n6.Quit \n";
+ cin>>ch;
+ switch(ch)
+ {
+  case 1:
+  {
+   d.accept();
+   break;
+  }
+  case 2:
+  {
+   cout<<"Enter key whose meaning to update \n";
+   cin>>key;
+   cout<<"Enter new meaning\n";
+   cin>>mean;
+   d.update(key,mean);
+   break;
+  }
+  case 3:
+   d.inorder(d.root);
+   break;
+  
+  case 4:
+   cout<<"Descending \n";
+   d.descending(d.root);
+   break;
+  
+  case 5:
+   d.inorder(d.root);
+   break;
+  default:
+   break;
+ } 
+ }while(ch!=6); /*cout<<"Enter word and its meaning"<<endl;
+  cin>>k>>m;
+  d.insert(k,m);*/
+ // d.accept();
+  //cout<<"Enter another word and its meaning \n";
+ // cin>>k>>m;
+ // d.insert(k,m);
+  
+ 
+  //cout<<"MAIN \n";
+  
+  
+ 
+return 0;
+}
+
